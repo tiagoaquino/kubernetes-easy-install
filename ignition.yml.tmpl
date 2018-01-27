@@ -29,6 +29,7 @@ systemd:
         --bind-address={{KUBE_SERVER_IP}} \
         --insecure-bind-address=0.0.0.0 \
         --etcd-servers=http://127.0.0.1:2379 \
+        --cert-dir=/etc/kubernetes \
         --service-cluster-ip-range={{CLUSTER_IP_RANGE}}
         RestartSec=10s
         Restart=always
@@ -43,8 +44,8 @@ systemd:
         [Service]
         ExecStart=/opt/bin/controller-manager \
         --kubeconfig=/opt/bin/kubeconfig.yml \
-        --root-ca-file=/var/run/kubernetes/apiserver.crt \
-        --service-account-private-key-file=/var/run/kubernetes/apiserver.key \
+        --root-ca-file=/etc/kubernetes/apiserver.crt \
+        --service-account-private-key-file=/etc/kubernetes/apiserver.key \
         --use-service-account-credentials
         RestartSec=10s
         Restart=always
