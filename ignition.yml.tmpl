@@ -1,0 +1,200 @@
+# This config is meant to be consumed by the config transpiler, which will
+# generate the corresponding Ignition config. Do not pass this config directly
+# to instances of Container Linux.
+#
+# ENVVARS and examples values:
+#  - KUBE_SERVER_IP=192.168.0.70
+#  - DOCKER_INSECURE_REGISTRY=192.168.0.0/24
+#  - CLUSTER_IP_RANGE=10.100.0.0/16
+#  - DNS_SERVICE_IP=10.100.0.10
+#  - KUBERNETES_VERSION=v1.9.2
+#  - PUBLIC_SSH_KEY="ssh-rsa AAAAB3Nz..."
+
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - {{PUBLIC_SSH_KEY}}
+
+systemd:
+  units:
+    - name: apiserver.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Kube API Server
+        [Service]
+        ExecStart=/opt/bin/apiserver \
+        --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota \
+        --bind-address={{KUBE_SERVER_IP}} \
+        --insecure-bind-address=0.0.0.0 \
+        --etcd-servers=http://127.0.0.1:2379 \
+        --service-cluster-ip-range={{CLUSTER_IP_RANGE}}
+        RestartSec=10s
+        Restart=always
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: controller-manager.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Kube Controller Manager
+        [Service]
+        ExecStart=/opt/bin/controller-manager \
+        --kubeconfig=/opt/bin/kubeconfig.yml \
+        --root-ca-file=/var/run/kubernetes/apiserver.crt \
+        --service-account-private-key-file=/var/run/kubernetes/apiserver.key \
+        --use-service-account-credentials
+        RestartSec=10s
+        Restart=always
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: scheduler.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Kube Scheduler
+        [Service]
+        ExecStart=/opt/bin/scheduler \
+        --kubeconfig=/opt/bin/kubeconfig.yml
+        RestartSec=10s
+        Restart=always
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: proxy.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Kube Proxy
+        [Service]
+        ExecStart=/opt/bin/proxy \
+        --kubeconfig=/opt/bin/kubeconfig.yml
+        RestartSec=10s
+        Restart=always
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: kubelet.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Kubelet
+        [Service]
+        ExecStart=/opt/bin/kubelet \
+        --kubeconfig=/opt/bin/kubeconfig.yml \
+        --hostname-override={{KUBE_SERVER_IP}} \
+        --cluster-dns={{DNS_SERVICE_IP}} \
+        --cluster-domain=cluster.local
+        RestartSec=10s
+        Restart=always
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: docker.service
+      enabled: true
+      dropins:
+        - name: 10-insecure-registry-docker.conf
+          contents: |
+            [Service]
+            Environment="DOCKER_OPTS=--insecure-registry={{DOCKER_INSECURE_REGISTRY}}"
+
+    - name: etcd-member.service
+      enabled: true
+
+    - name: kube-installer.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Kubernetes Installer
+        After=etcd-member.service
+        Requires=etcd-member.service
+        ConditionFirstBoot=yes
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/sh -c 'sleep 30; \
+        retries=30; \
+        minReady=1; \
+        count=1; \
+        while [[ `/opt/bin/kubectl get nodes | grep Ready | wc -l` -lt $minReady ]] && [[ $count -le $retries ]]; \
+        do \
+          echo "[$count] Waiting kubernetes..."; \
+          sleep 5; \
+          count=$(( $count + 1 )); \
+        done; \
+        if [ `/opt/bin/kubectl get nodes | grep Ready | wc -l` -lt $minReady ]; \
+        then \
+          echo "Kubernetes Error - Not Ready!"; \
+          exit 1; \
+        fi; \
+        /opt/bin/kubectl create -f /opt/bin/kube-install.yml >> /home/core/kube-installer-log.txt 2>&1'
+        [Install]
+        WantedBy=sysinit.target
+
+storage:
+  files:
+    - path: /opt/bin/hyperkube
+      filesystem: root
+      contents:
+        remote:
+          url: https://storage.googleapis.com/kubernetes-release/release/{{KUBERNETES_VERSION}}/bin/linux/amd64/hyperkube
+      mode: 0755
+    - path: /opt/bin/kubectl
+      filesystem: root
+      contents:
+        remote:
+          url: https://storage.googleapis.com/kubernetes-release/release/{{KUBERNETES_VERSION}}/bin/linux/amd64/kubectl
+      mode: 0755
+    - path: /home/core/.kube/config
+      filesystem: root
+      contents:
+        local: kubeconfig.yml
+      mode: 0644
+      user:
+        name: core
+      group:
+        name: core
+    - path: /opt/bin/kubeconfig.yml
+      filesystem: root
+      contents:
+        local: kubeconfig.yml
+      mode: 0644
+    - path: /opt/bin/kube-install.yml
+      filesystem: root
+      contents:
+        local: kube-install.yml
+      mode: 0644
+    - path: /opt/bin/kube-test.yml
+      filesystem: root
+      contents:
+        local: kube-test.yml
+      mode: 0644
+  links:
+    - path: /opt/bin/aggregator
+      target: /opt/bin/hyperkube
+      filesystem: root
+      hard: false
+    - path: /opt/bin/apiserver
+      target: /opt/bin/hyperkube
+      filesystem: root
+      hard: false
+    - path: /opt/bin/controller-manager
+      target: /opt/bin/hyperkube
+      filesystem: root
+      hard: false
+    - path: /opt/bin/kubelet
+      target: /opt/bin/hyperkube
+      filesystem: root
+      hard: false
+    - path: /opt/bin/proxy
+      target: /opt/bin/hyperkube
+      filesystem: root
+      hard: false
+    - path: /opt/bin/scheduler
+      target: /opt/bin/hyperkube
+      filesystem: root
+      hard: false
+
+

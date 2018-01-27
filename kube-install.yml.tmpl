@@ -1,0 +1,304 @@
+# ENVVARS and examples values:
+#  - DNS_SERVICE_IP=10.100.0.10
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-controller
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tls-secret
+  namespace: ingress-controller
+type: kubernetes.io/tls
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMrekNDQWVPZ0F3SUJBZ0lKQUp0SFZMTXRESUF6TUEwR0NTcUdTSWIzRFFFQkN3VUFNQlF4RWpBUUJnTlYKQkFNTUNXeHZZMkZzYUc5emREQWVGdzB4T0RBeE1qUXlNRFUyTkRWYUZ3MHlPREF4TWpReU1EVTJORFZhTUJReApFakFRQmdOVkJBTU1DV3h2WTJGc2FHOXpkRENDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DCmdnRUJBTm16bkNqOGNvc3hEYWZZZmpTVDZwcmNUdEFuWVZrMU5ER3BRK3BnR0luYTdTUjlTTFl1M1l1bVdDNlIKN0ZGVTk3TnB2ZXMySThwd1NuWmoxeTVjN2dNaXQ3bU1wK2JYZ29WS0ZJWU16dVVMUXdSZEFCWlNVZFhaUGNTUwpBYzhTc2ZialNHMWZFYm5VYVVKei9QNjVPRW5CcmJIaG5hakFRRWxhenJpS2pGbTNLSnZsdVdpVkxESUJ5ZVBuCmZieFduN01pRC95OXFnd3hDU2Q0NWp2V0NzRFhyaFZhcnZRNDAxTlJPaUJnZXppdjU2RzErc1J5dkJMVWRlQ3QKK3R5SytxTFhvS1Y0N1lWcnErQ1JMRWhianhlTWs4R1lhL2toV1ZZMklFSWJHZU55VGI1NmlhSTlGR0xrZEhDSwpQaGI5Ky9lUDVWZlF3MzUycUlEQVlDbUpwWUVDQXdFQUFhTlFNRTR3SFFZRFZSME9CQllFRlBYWko2eGIzc1FRCmFtSS80VFRLMjBMS3FvNGdNQjhHQTFVZEl3UVlNQmFBRlBYWko2eGIzc1FRYW1JLzRUVEsyMExLcW80Z01Bd0cKQTFVZEV3UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFKendQVjkwcmJTRXpYTG5penN2STZRQgpMOStqczR0VXlFSGJ0bktrZG4yVmlDK3B2QTBkc1Z2bERCRjU5RmZ2UzdjaUQ5Z0JHUDhvcjV2aU0xeU91ZXozCjd3dGZSekY1VEg3Z3RBN0hGVVJ1ak13OEgyNW1VTlEwQU9COVVWSzNGYlFXZEtmSG1uOWpHbFdrc09mVDJSZUEKU0l4MnpybE1zMUEva0hUcGI1OWtmWjFtRktSWTVRdmNseU5INSt0MW9xK2JBUzFkbGw1VjNIVlFDNklMU2tLRQpKZVIzcHhya2hlTVZhVkxCQWVNWEJOaThpODZTanBRMW85Z25peG95Ykw0WlArMURtMUdhQVhDUWdPekl6em93CmkyaVgrSVZCangvWVFWSVl3N1pPTlpkWjRVQ1NPWngyL2pqeGZzdVZEVTVKY2s1eWJBQjJWMDAzVG8yS0V4TT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRRFpzNXdvL0hLTE1RMm4KMkg0MGsrcWEzRTdRSjJGWk5UUXhxVVBxWUJpSjJ1MGtmVWkyTHQyTHBsZ3VrZXhSVlBlemFiM3JOaVBLY0VwMgpZOWN1WE80RElyZTVqS2ZtMTRLRlNoU0dETTdsQzBNRVhRQVdVbEhWMlQzRWtnSFBFckgyNDBodFh4RzUxR2xDCmMveit1VGhKd2EyeDRaMm93RUJKV3M2NGlveFp0eWliNWJsb2xTd3lBY25qNTMyOFZwK3pJZy84dmFvTU1Ra24KZU9ZNzFnckExNjRWV3E3ME9OTlRVVG9nWUhzNHIrZWh0ZnJFY3J3UzFIWGdyZnJjaXZxaTE2Q2xlTzJGYTZ2ZwprU3hJVzQ4WGpKUEJtR3Y1SVZsV05pQkNHeG5qY2syK2VvbWlQUlJpNUhSd2lqNFcvZnYzaitWWDBNTitkcWlBCndHQXBpYVdCQWdNQkFBRUNnZ0VBWlp1Syt5WTRYL2JaSk1uS3ZjZDc3Q04vTlcvcjQ3TU5WVkJuUG5Eemd3UUgKUXN5bXIwRlliZUdKcnRLMHRaRXV1ekpUVGdESzI2VmxXN1Jscm1INVJNVmpjdHJQVXRLclBJTEM2WDM0NHJaSwo1VEp5NC9ndjhkdWZGS3dBNUNFWnB0MlY1RlpHODdETUlCUDZ0UGpGNk1iWXh2bENtSXlDZExwSldhQnd1VDRDCndoWFl5Y1ZJWFVLQnIwWStoZitFclhtNi94bnZDS3RNWHBUMXVObDJUZjhyUFpTRDdqN24xVkVXKzA5MFk4STUKVUdUODd5L2RLUUpvdkNIR2VNMVRFR2ZZaXcrSC9pVFVacHBGUHAzKzJGZXcxbEVrb3FpSWdDYjZpWVA2WTQwVAovaFYybTdjVmtLc0Urb3BYZmg3cmQ2NHh1cUVuY0YrMmVpS2VJWjdrQVFLQmdRRDI5NE9SRzhxS0FwblZhbWFlCjB4eWwxWWY2cmh1dGJVUE4zTnhock5TRHBTZWlkc1Rpbklqc2VyNVBsZlNSWXJFYnRWRTU1SDMrYlRMZElTeDUKRmdXQkxFbFlxNk9id0dHYWRzdVdvUDBRcGQ0MnhWdFNIcVBlNFRsVE1OcTMwOENKbi84cTZQWG54N0FqY3hWbQpnMlVPYURoRHNhSXBhV3JweFk3emg4Uk9FUUtCZ1FEaHFoSEp3M3Y2VHk5MFR4OHo2RmJIQ2ZqMEg5THBuaEg3CkdaYjFRdG9xYWhReTRjYWc5MnFldS9vRi9SZ09PM0ZZdE41L3NYdW1wQSs0MU5manhtd3pSOHdiQm5RY0R1cWwKSnhpdEhTWHdVRm1mWXlHR1NhaDRWNWxSWFhVK2k4UHFIMmczSEVHQmdhZ0lmN2pJcEZEV216WjZMRE5Xbk9kRAp1SGpsV1VBd2NRS0JnUUNhZXVTZlJnVUJJdk5hM1gxblo2S0owUEdIeXBTaGZMRm0rZm9ZVnVWdm0wVVppTFZMCkVxTkxXTlBtTUdTVTlHalliaWhxMEJSSHE4S2ZNM3NBR3RoQ25wTWFsZkozSUhWdEMxWDUyS1d6WGkyTGtSTzQKWUZZY3VrRURXcEhWWHUwV3FUQVJoVHNjU25wUkVsR1dtQ1lFUndpNnYwZ3lJekN2SGRaM1dydGVJUUtCZ0V0eQpSOFkwSkVRWXExM3dnaGNocTdtWi9QRHBudU5hWk5xVndLRzVPeVdKRjcyM1BHaGVyL2ZvRXZ4amxPSlZQMTBRCkEzK2Z3QjZEcFhuL056ckJBVFhYNEVaOHp0NytvYmFicnFWYUpIQUcvUi9MemM2TzI5TjRQaHMwNnRrQmMzdlkKQ2tpNm1yQUl3RHd2TDRGdFpsV0p5Um5wb3pSbSt1N3FRd2t5NE1JUkFvR0JBSi9rYll4OGxEUnFQZTF5ZTV4aApBNzVCeEVHYUtSRmZwV29ZRnNaYjNsWkFGZW9za21iRVBudjNWR3JsZjR0WGJpVVhMQU9yTnNZbStQdWhqMEs3CnpsUmhKSE56bmg1b21vSk5CZWpxUHI2bW5MbTVZVkNFYWprMG1kWkhqMWRRSzlKODNWeGxQeDNOYnFvQmpSK0MKSFF2QmRKeExDVXBFcFlVank0d2xmT3RjCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-default-backend
+  namespace: ingress-controller
+spec:
+  ports:
+  - port: 8080
+  selector:
+    run: ingress-default-backend
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: ingress-default-backend
+  name: ingress-default-backend
+  namespace: ingress-controller
+spec:
+  selector:
+    matchLabels:
+      run: ingress-default-backend
+  template:
+    metadata:
+      labels:
+        run: ingress-default-backend
+    spec:
+      containers:
+      - name: ingress-default-backend
+        image: gcr.io/google_containers/defaultbackend:1.0
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: 10m
+            memory: 20Mi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: haproxy-ingress
+  namespace: ingress-controller
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: haproxy-ingress
+  name: haproxy-ingress
+  namespace: ingress-controller
+spec:
+  selector:
+    matchLabels:
+      run: haproxy-ingress
+  template:
+    metadata:
+      labels:
+        run: haproxy-ingress
+    spec:
+      hostNetwork: true
+      containers:
+      - name: haproxy-ingress
+        image: quay.io/jcmoraisjr/haproxy-ingress
+        args:
+        - --default-backend-service=$(POD_NAMESPACE)/ingress-default-backend
+        - --default-ssl-certificate=$(POD_NAMESPACE)/tls-secret
+        - --configmap=$(POD_NAMESPACE)/haproxy-ingress
+        ports:
+        - name: http
+          containerPort: 80
+        - name: https
+          containerPort: 443
+        - name: stat
+          containerPort: 1936
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+    kubernetes.io/name: "KubeDNS"
+spec:
+  selector:
+    k8s-app: kube-dns
+  clusterIP: {{DNS_SERVICE_IP}}
+  ports:
+  - name: dns
+    port: 53
+    protocol: UDP
+  - name: dns-tcp
+    port: 53
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  labels:
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  labels:
+    addonmanager.kubernetes.io/mode: EnsureExists
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+spec:
+  # replicas: not specified here:
+  # 1. In order to make Addon Manager do not reconcile this replicas parameter.
+  # 2. Default is 1.
+  # 3. Will be tuned in real time if DNS horizontal auto-scaling is turned on.
+  strategy:
+    rollingUpdate:
+      maxSurge: 10%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      k8s-app: kube-dns
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-dns
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      tolerations:
+      - key: "CriticalAddonsOnly"
+        operator: "Exists"
+      volumes:
+      - name: kube-dns-config
+        configMap:
+          name: kube-dns
+          optional: true
+      containers:
+      - name: kubedns
+        image: gcr.io/google_containers/k8s-dns-kube-dns-amd64:1.14.7
+        resources:
+          # TODO: Set memory limits when we've profiled the container for large
+          # clusters, then set request = limit to keep this container in
+          # guaranteed class. Currently, this container falls into the
+          # "burstable" category so the kubelet doesn't backoff from restarting it.
+          limits:
+            memory: 170Mi
+          requests:
+            cpu: 100m
+            memory: 70Mi
+        livenessProbe:
+          httpGet:
+            path: /healthcheck/kubedns
+            port: 10054
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8081
+            scheme: HTTP
+          # we poll on pod startup for the Kubernetes master service and
+          # only setup the /readiness HTTP server once that's available.
+          initialDelaySeconds: 3
+          timeoutSeconds: 5
+        args:
+        - --domain=cluster.local.
+        - --dns-port=10053
+        - --config-dir=/kube-dns-config
+        - --v=2
+        env:
+        - name: PROMETHEUS_PORT
+          value: "10055"
+        ports:
+        - containerPort: 10053
+          name: dns-local
+          protocol: UDP
+        - containerPort: 10053
+          name: dns-tcp-local
+          protocol: TCP
+        - containerPort: 10055
+          name: metrics
+          protocol: TCP
+        volumeMounts:
+        - name: kube-dns-config
+          mountPath: /kube-dns-config
+      - name: dnsmasq
+        image: gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.7
+        livenessProbe:
+          httpGet:
+            path: /healthcheck/dnsmasq
+            port: 10054
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        args:
+        - -v=2
+        - -logtostderr
+        - -configDir=/etc/k8s/dns/dnsmasq-nanny
+        - -restartDnsmasq=true
+        - --
+        - -k
+        - --cache-size=1000
+        - --no-negcache
+        - --log-facility=-
+        - --server=/cluster.local/127.0.0.1#10053
+        - --server=/in-addr.arpa/127.0.0.1#10053
+        - --server=/ip6.arpa/127.0.0.1#10053
+        ports:
+        - containerPort: 53
+          name: dns
+          protocol: UDP
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+        # see: https://github.com/kubernetes/kubernetes/issues/29055 for details
+        resources:
+          requests:
+            cpu: 150m
+            memory: 20Mi
+        volumeMounts:
+        - name: kube-dns-config
+          mountPath: /etc/k8s/dns/dnsmasq-nanny
+      - name: sidecar
+        image: gcr.io/google_containers/k8s-dns-sidecar-amd64:1.14.7
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: 10054
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        args:
+        - --v=2
+        - --logtostderr
+        - --probe=kubedns,127.0.0.1:10053,kubernetes.default.svc.cluster.local,5,SRV
+        - --probe=dnsmasq,127.0.0.1:53,kubernetes.default.svc.cluster.local,5,SRV
+        ports:
+        - containerPort: 10054
+          name: metrics
+          protocol: TCP
+        resources:
+          requests:
+            memory: 20Mi
+            cpu: 10m
+      dnsPolicy: Default  # Don't use cluster DNS.
+      serviceAccountName: kube-dns
