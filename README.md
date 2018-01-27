@@ -1,12 +1,12 @@
 # Kubernetes (Single Node)
 ## How to install kubernetes with Container Linux Config Files
 ### Installation steps:
-1. Download the lastest ISO image from CoreOS Container Linux: https://stable.release.core-os.net/amd64-usr/current/coreos_production_iso_image.iso
+1. Download the latest ISO image from CoreOS Container Linux: https://stable.release.core-os.net/amd64-usr/current/coreos_production_iso_image.iso
 
 2. Create a VM and boot up with this iso image. 
-   PS: The VM needs internet connection to download kubernetes on first start boot.
+   PS: The VM needs an internet connection to download kubernetes on first start boot.
 
-3. When system starts then copy these project files to a folder like `/home/core/kube` (This folder will be assumed in next steps).
+3. When the system starts then copy these project files to a folder like `/home/core/kube` (This folder will be assumed in next steps).
 
 4. Generate SSH key pairs to CoreOS using `ssh-keygen`. The public ssh key can be set on next step.
 
